@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 
 [Serializable]
+
 public enum DamageType
 {
     slash,

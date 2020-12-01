@@ -7,6 +7,7 @@ using Random = UnityEngine.Random;
 public class EnemyScript : MonoBehaviour
 {
     public GameObject target;
+    public GameManager GameManager;
 
     IEnumerator ActionCoroutine()
     {
@@ -15,6 +16,11 @@ public class EnemyScript : MonoBehaviour
         int agilityIndex = stats.FindIndex(val => val.Name == "agility");
         while (true)
         {
+            //First, check if the game state is paused from an active turn or not.
+            while (GameManager.ActiveTurn)
+            {
+                yield return null;
+            }
             //I need to calculate the rate of increase based on agility, but just a hard-coded 10 APS will work for now.
             //Scratch that, with a max Action of 100 that takes way too long. 40 APS makes for a good number in my opinion.
             //Changing it again down to 20 for the sake of incentivising at least some point allocation into agility.
@@ -23,6 +29,16 @@ public class EnemyScript : MonoBehaviour
             if (values[actionIndex].Val > values[maxActionIndex].Val)
             {
                 values[actionIndex].Val = values[maxActionIndex].Val;
+            }
+            if (oldValue != values[actionIndex].Val)
+            {
+                HUDManager.UpdateHud(values);
+            }
+            if (values[actionIndex].Val == values[maxActionIndex].Val)
+            {
+                GameManager.ActiveTurn = true;
+                GameManager.CurrentTurn = "Enemy"; //Needs actual method of pulling name later
+                GameManager.CurrentTurnObject = gameObject;
             }
             yield return new WaitForSeconds((float)((stats[agilityIndex].Val * -0.0025) + 0.05));
         }
@@ -35,6 +51,11 @@ public class EnemyScript : MonoBehaviour
         int attunementIndex = stats.FindIndex(val => val.Name == "attunement");
         while (true)
         {
+            //First, check if the game state is paused from an active turn or not.
+            while (GameManager.ActiveTurn)
+            {
+                yield return null;
+            }
             //I need to calculate the rate of increase based on agility, but just a hard-coded 10 APS will work for now.
             //Scratch that, with a max Action of 100 that takes way too long. 40 APS makes for a good number in my opinion.
             //Changing it again down to 20 for the sake of incentivising at least some point allocation into agility.
@@ -43,6 +64,10 @@ public class EnemyScript : MonoBehaviour
             if (values[manaIndex].Val > values[maxActionIndex].Val)
             {
                 values[manaIndex].Val = values[maxActionIndex].Val;
+            }
+            if (oldValue != values[manaIndex].Val)
+            {
+                HUDManager.UpdateHud(values);
             }
             yield return new WaitForSeconds(seconds: 1f / (Convert.ToSingle(stats[attunementIndex].Val) + 4f));
         }
@@ -53,6 +78,11 @@ public class EnemyScript : MonoBehaviour
         //This script handles status effects, by ticking their timer down and applying their effects *if it is an effect that deals with health.* Other effects that don't deal with health will be handled elsewhere.
         while (true)
         {
+            //First, check if the game state is paused from an active turn or not.
+            while (GameManager.ActiveTurn)
+            {
+                yield return null;
+            }
             Dictionary<string, int> tempDict = new Dictionary<string, int>();
             foreach (KeyValuePair<string, int> status in statusTimers)
             {
@@ -159,7 +189,7 @@ public class EnemyScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("PlayerScript Running");
+        Debug.Log("EnemyScript Running");
         StartCoroutine("ActionCoroutine");
         Coroutine statusCoroutine = StartCoroutine("StatusCoroutine");
         Coroutine manaCoroutine = StartCoroutine("ManaCoroutine");
@@ -167,7 +197,7 @@ public class EnemyScript : MonoBehaviour
 
     public void OnAttacked(int damage, DamageType type, List<Value> inputStats)
     {
-        print("Player has been attacked!");
+        print("Enemy has been attacked!");
         //First, calculate the chance that the attack will hit in the first place.
         //Consider: Maybe factor in something on the enemies' side when calculating dodge chance?
         List<Value> enemyStats = new List<Value>();
@@ -206,6 +236,7 @@ public class EnemyScript : MonoBehaviour
         }
 
         int hitChance = 100 - ((stats[agilityIndex].Val - stats[enduranceIndex].Val) * 5 - Math.Max(enemyStats[strengthIndex].Val, enemyStats[intelligenceIndex].Val));
+        //int hitChance = 50;
 
         if (type == DamageType.healing)
         {
@@ -220,8 +251,7 @@ public class EnemyScript : MonoBehaviour
         }
         else
         {
-            int hitNum = Random.Range(0, 101);
-            if (hitNum <= hitChance)
+            if (Random.Range(0, 101) >= hitChance)
             {
                 try
                 {
@@ -239,17 +269,61 @@ public class EnemyScript : MonoBehaviour
         }
     }
 
+
+    //The below code for the attack function was copied directly from the player script. (As was most of the code here, since enemies will follow the same rules as players.)
     //*
     public void Attack()
     {
+        //First I need to caluclate the base damage of the attack. This won't be straight forward as damage types, stats, modifiers, and more need to be considered. For now though, attacks will be assumed to be based on strength.]
+        //I'll pretend this is a punch attack, so I'll be using impact damage for the example attack.
+        //At some point I'll need to implement target selection, but since there's only one enemy I can go without for now.
 
+        EnemyScript enemyScript = target.GetComponent<EnemyScript>();
+
+        int strengthScore = stats.Find(val => val.Name == "strength").Val;
+        int agilityScore = stats.Find(val => val.Name == "agility").Val;
+        int enduranceScore = stats.Find(val => val.Name == "endurance").Val;
+        int intelligenceScore = stats.Find(val => val.Name == "intelligence").Val;
+        int attunementScore = stats.Find(val => val.Name == "attunement").Val;
+
+        //int weaponDamage = 10; //This is a temporary variable, setting it to ten for a punch. Will be determined by equiped weapon later.
+        int minWeaponDamage = 8;
+        int maxWeaponDamage = 12;
+        int weaponDamage = Random.Range(minWeaponDamage, maxWeaponDamage);
+        //Quick little change. Instead of weapons having a specific attack power, they'll have a damage range, where the base weapon damage used for the calculation could be anywhere within it.
+        DamageType weaponDamageType = DamageType.impact; //Another temp variable, setting the damage type for the attack to be impact since it's a punch. This is the type of damage delt.
+        WeaponType weaponType = WeaponType.physical; //TempVar, is represends what buffs/stats effect this weapon.
+        //Next variable is where the actual attack damage computation is done.
+        int attackDamage;
+        switch (weaponType)
+        {
+            case WeaponType.physical:
+                attackDamage = Mathf.RoundToInt(weaponDamage * (0.25f * Mathf.Pow(strengthScore, 0.5f) + 1));
+                Debug.Log((0.25f * Mathf.Pow(strengthScore, 0.5f) + 1));
+                enemyScript.OnAttacked(attackDamage, weaponDamageType, stats);
+                break;
+            case WeaponType.magical:
+                attackDamage = Mathf.RoundToInt(weaponDamage * (0.25f * (Mathf.Pow(intelligenceScore, 0.5f) + 1)));
+                enemyScript.OnAttacked(attackDamage, weaponDamageType, stats);
+                break;
+            default:
+                break;
+        }
     }
     //*/
 
     //TODO: Handle player and enemy death.
     public void OnDeath()
     {
+        //For now, I'll just log a debug message when an enemy dies, maybe hide their sprite too.
+        Debug.Log("Enemy has died!");
+    }
 
+    //This function is going to be the hardest part of making enemies. I have never wrtitten AI code before, so I'll be walking into this blind. One of the downsides of a single player game...
+    public void Decide()
+    {
+        //I'm writing this code late at night, and I frankly have no idea what I'm doing. For now, I'll just make the enemy attack the player back every turn since that's all there is to do.
+        Attack();
     }
 
     public void printStats()

@@ -7,6 +7,7 @@ using Random = UnityEngine.Random;
 public class PlayerBattleScript : MonoBehaviour
 {
     public GameObject target;
+    public GameManager GameManager;
 
     IEnumerator ActionCoroutine()
     {
@@ -15,6 +16,11 @@ public class PlayerBattleScript : MonoBehaviour
         int agilityIndex = stats.FindIndex(val => val.Name == "agility");
         while (true)
         {
+            //First, check if the game state is paused from an active turn or not.
+            while (GameManager.ActiveTurn)
+            {
+                yield return null;
+            }
             //I need to calculate the rate of increase based on agility, but just a hard-coded 10 APS will work for now.
             //Scratch that, with a max Action of 100 that takes way too long. 40 APS makes for a good number in my opinion.
             //Changing it again down to 20 for the sake of incentivising at least some point allocation into agility.
@@ -28,10 +34,15 @@ public class PlayerBattleScript : MonoBehaviour
             {
                 HUDManager.UpdateHud(values);
             }
+            if (values[actionIndex].Val == values[maxActionIndex].Val)
+            {
+                GameManager.ActiveTurn = true;
+                GameManager.CurrentTurn = "Player"; //Needs actual method of pulling name later
+                GameManager.CurrentTurnObject = gameObject;
+            }
             yield return new WaitForSeconds((float)((stats[agilityIndex].Val * -0.0025) + 0.05));
         }
     }
-
 
     IEnumerator ManaCoroutine()
     {
@@ -40,6 +51,11 @@ public class PlayerBattleScript : MonoBehaviour
         int attunementIndex = stats.FindIndex(val => val.Name == "attunement");
         while (true)
         {
+            //First, check if the game state is paused from an active turn or not.
+            while (GameManager.ActiveTurn)
+            {
+                yield return null;
+            }
             //I need to calculate the rate of increase based on agility, but just a hard-coded 10 APS will work for now.
             //Scratch that, with a max Action of 100 that takes way too long. 40 APS makes for a good number in my opinion.
             //Changing it again down to 20 for the sake of incentivising at least some point allocation into agility.
@@ -62,6 +78,11 @@ public class PlayerBattleScript : MonoBehaviour
         //This script handles status effects, by ticking their timer down and applying their effects *if it is an effect that deals with health.* Other effects that don't deal with health will be handled elsewhere.
         while (true)
         {
+            //First, check if the game state is paused from an active turn or not.
+            while (GameManager.ActiveTurn)
+            {
+                yield return null;
+            }
             Dictionary<string, int> tempDict = new Dictionary<string, int>();
             foreach (KeyValuePair<string, int> status in statusTimers)
             {
@@ -266,7 +287,11 @@ public class PlayerBattleScript : MonoBehaviour
         int intelligenceScore = stats.Find(val => val.Name == "intelligence").Val;
         int attunementScore = stats.Find(val => val.Name == "attunement").Val;
 
-        int weaponDamage = 10; //This is a temporary variable, setting it to ten for a punch. Will be determined by equiped weapon later.
+        //int weaponDamage = 10; //This is a temporary variable, setting it to ten for a punch. Will be determined by equiped weapon later.
+        int minWeaponDamage = 8;
+        int maxWeaponDamage = 12;
+        int weaponDamage = Random.Range(minWeaponDamage, maxWeaponDamage);
+        //Quick little change. Instead of weapons having a specific attack power, they'll have a damage range, where the base weapon damage used for the calculation could be anywhere within it.
         DamageType weaponDamageType = DamageType.impact; //Another temp variable, setting the damage type for the attack to be impact since it's a punch. This is the type of damage delt.
         WeaponType weaponType = WeaponType.physical; //TempVar, is represends what buffs/stats effect this weapon.
         //Next variable is where the actual attack damage computation is done.
@@ -292,6 +317,13 @@ public class PlayerBattleScript : MonoBehaviour
     public void OnDeath()
     {
 
+    }
+
+    //This will be the function responsible for halting all status, regen, and action timers when a character's turn starts.
+    //This way, there is no benefit or detriment to taking your time and thinking out your actions. Combo's are cool, after all.
+    public void StartTurn()
+    {
+        
     }
 
     public void printStats()
