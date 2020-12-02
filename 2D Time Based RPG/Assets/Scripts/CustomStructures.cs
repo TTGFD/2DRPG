@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
+using UnityEngine;
 
 [Serializable]
 public enum Modif
@@ -78,4 +82,62 @@ public class Modifier
 
     public Modif ModifierType;
     public int ModifStrength;
+}
+
+[Serializable]
+public class PlayerData
+{
+    public string Name;
+    public List<Vulnerability> Vulnerabilities;
+    public List<Value> Values;
+    public List<Value> Stats;
+    public List<Modifier> Modifiers;
+    public Dictionary<string, int> StatusEffects;
+
+    public PlayerData(string name, List<Vulnerability> vulnerabilities, List<Value> values, List<Value> stats, List<Modifier> modifiers, Dictionary<string, int> statusEffects)
+    {
+        Name = name;
+        Vulnerabilities = vulnerabilities;
+        Values = values;
+        Stats = stats;
+        Modifiers = modifiers;
+        StatusEffects = statusEffects;
+    }
+}
+
+public static class DataSave
+{
+    public static void Save(PlayerData plr)
+    {
+        BinaryFormatter bf = new BinaryFormatter();
+        if (File.Exists(Application.persistentDataPath + "/PlayerData.save"))
+        {
+            FileStream fs = File.OpenWrite(Application.persistentDataPath + "/PlayerData.save");
+
+            bf.Serialize(fs, plr);
+        }
+        else
+        {
+            FileStream fs = File.Create(Application.persistentDataPath + "/PlayerData.save");
+
+            bf.Serialize(fs, plr);
+        }
+    }
+
+    public static PlayerData Load()
+    {
+        BinaryFormatter bf = new BinaryFormatter();
+        if (File.Exists(Application.persistentDataPath + "/PlayerData.save"))
+        {
+            FileStream fs = File.OpenRead(Application.persistentDataPath + "/PlayerData.save");
+
+            PlayerData data = bf.Deserialize(fs) as PlayerData;
+            return data;
+        }
+        else
+        {
+            Debug.LogError("Save file does not exist, make sure save file is present in the correct directory.");
+            return null;
+        }
+    }
 }

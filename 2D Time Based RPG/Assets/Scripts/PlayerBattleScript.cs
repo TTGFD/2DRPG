@@ -194,10 +194,26 @@ public class PlayerBattleScript : MonoBehaviour
     void Start()
     {
         Debug.Log("PlayerScript Running");
+        //PlayerData data = DataSave.Load();
+        //values = data.Values;
+        //stats = data.Stats;
+        //statusTimers = data.StatusEffects;
+        //modifiers = data.Modifiers;
+        //data = null;
         HUDManager.UpdateHud(values);
-        StartCoroutine("ActionCoroutine");
+        Coroutine actionCoroutine = StartCoroutine("ActionCoroutine");
         Coroutine statusCoroutine = StartCoroutine("StatusCoroutine");
         Coroutine manaCoroutine = StartCoroutine("ManaCoroutine");
+    }
+
+    public void OnApplicationQuit()
+    {
+        PlayerData data = new PlayerData("Player", vulnerabilites, values, stats, modifiers, statusTimers);
+        data.Values = values;
+        data.Stats = stats;
+        data.StatusEffects = statusTimers;
+        data.Modifiers = modifiers;
+        DataSave.Save(data);
     }
 
     public void OnAttacked(int damage, DamageType type, List<Value> inputStats)
