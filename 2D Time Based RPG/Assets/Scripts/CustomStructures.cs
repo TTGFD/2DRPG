@@ -103,6 +103,55 @@ public class PlayerData
         Modifiers = modifiers;
         StatusEffects = statusEffects;
     }
+
+    public PlayerData(string name)
+    {
+        Name = name;
+        Vulnerabilities = new List<Vulnerability>
+        {
+            new Vulnerability(DamageType.slash, 100),
+            new Vulnerability(DamageType.puncture, 100),
+            new Vulnerability(DamageType.impact, 100),
+            new Vulnerability(DamageType.shock, 100),
+            new Vulnerability(DamageType.flame, 100),
+            new Vulnerability(DamageType.frost, 100),
+            new Vulnerability(DamageType.light, 100),
+            new Vulnerability(DamageType.dark, 100),
+            new Vulnerability(DamageType.poison, 100),
+            new Vulnerability(DamageType.healing, 100)
+        };
+        Values = new List<Value>()
+        {
+            new Value("health", 100),
+            new Value("maxHealth", 100),
+            new Value("mana", 100),
+            new Value("maxMana", 100),
+            new Value("soulpower", 0),
+            new Value("maxSoulpower", 100),
+            new Value("faith", 0),
+            new Value("maxFaith", 100),
+            new Value("rage", 0),
+            new Value("maxRage", 100),
+            new Value("action", 0),
+            new Value("maxAction", 100),
+            new Value("level", 0)
+        };
+        Stats = new List<Value>()
+        {
+            new Value("strength", 0),
+            new Value("agility", 0),
+            new Value("endurance", 0),
+            new Value("intelligence", 0),
+            new Value("attunement", 0)
+        };
+        StatusEffects = new Dictionary<string, int>()
+        {
+            {"bleed", 0},
+            {"weakness", 0},
+            {"regeneration", 0},
+            {"poison", 0}
+        };
+    }
 }
 
 public static class DataSave

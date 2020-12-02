@@ -189,17 +189,33 @@ public class PlayerBattleScript : MonoBehaviour
     };
 
     //Modifiers will be used to store any changes to stats or values based on equipment or other stats. For example, an additional 5 HP will be added for every level of Endurance.
-    
+
+    public bool LoadSaveOnStart; //Debug Variable used to disable save loading when the game starts. (And save... saving.)
+
     // Start is called before the first frame update
     void Start()
     {
         Debug.Log("PlayerScript Running");
-        //PlayerData data = DataSave.Load();
-        //values = data.Values;
-        //stats = data.Stats;
-        //statusTimers = data.StatusEffects;
-        //modifiers = data.Modifiers;
-        //data = null;
+
+        if (System.IO.File.Exists(Application.persistentDataPath + "/PlayerData.save") & LoadSaveOnStart)
+        {
+            PlayerData data = DataSave.Load();
+            values = data.Values;
+            stats = data.Stats;
+            statusTimers = data.StatusEffects;
+            modifiers = data.Modifiers;
+            data = null;
+        }
+        else
+        {
+            PlayerData data = new PlayerData("Player");
+            values = data.Values;
+            stats = data.Stats;
+            statusTimers = data.StatusEffects;
+            modifiers = data.Modifiers;
+            data = null;
+        }
+        
         HUDManager.UpdateHud(values);
         Coroutine actionCoroutine = StartCoroutine("ActionCoroutine");
         Coroutine statusCoroutine = StartCoroutine("StatusCoroutine");
@@ -208,12 +224,15 @@ public class PlayerBattleScript : MonoBehaviour
 
     public void OnApplicationQuit()
     {
-        PlayerData data = new PlayerData("Player", vulnerabilites, values, stats, modifiers, statusTimers);
-        data.Values = values;
-        data.Stats = stats;
-        data.StatusEffects = statusTimers;
-        data.Modifiers = modifiers;
-        DataSave.Save(data);
+        if (LoadSaveOnStart)
+        {
+            PlayerData data = new PlayerData("Player", vulnerabilites, values, stats, modifiers, statusTimers);
+            data.Values = values;
+            data.Stats = stats;
+            data.StatusEffects = statusTimers;
+            data.Modifiers = modifiers;
+            DataSave.Save(data);
+        }
     }
 
     public void OnAttacked(int damage, DamageType type, List<Value> inputStats)
