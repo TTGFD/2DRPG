@@ -389,6 +389,7 @@ MonoBehaviour:
     ModifStrength: 0
   - ModifierType: 4
     ModifStrength: 0
+  LoadSaveOnStart: 0
 --- !u!1 &214581648
 GameObject:
   m_ObjectHideFlags: 0
@@ -1534,6 +1535,17 @@ MonoBehaviour:
     Val: 0
   - Name: attunement
     Val: 0
+  modifiers:
+  - ModifierType: 0
+    ModifStrength: 0
+  - ModifierType: 1
+    ModifStrength: 100
+  - ModifierType: 2
+    ModifStrength: 0
+  - ModifierType: 3
+    ModifStrength: 0
+  - ModifierType: 4
+    ModifStrength: 0
 --- !u!1 &1204360466
 GameObject:
   m_ObjectHideFlags: 0
