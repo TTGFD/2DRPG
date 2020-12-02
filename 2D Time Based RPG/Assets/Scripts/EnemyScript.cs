@@ -151,7 +151,7 @@ public class EnemyScript : MonoBehaviour
         new Value("attunement", 0)
     };
     /*
-        Strength: Damage modfier for slash, puncture, and impact damage.
+        Strength: Damage modfier for physical damage types.
         Agility: Increases action charge speed and chance to dodge.
         Endurance: Increases maximum HP, but decreases dodge chance.
         Intelligence: Increases magic attack power, but increases mana consumption.
@@ -167,9 +167,13 @@ public class EnemyScript : MonoBehaviour
         {"poison", 0}
     };
 
-    public Dictionary<string, int> modifiers = new Dictionary<string, int>()
+    public List<Modifier> modifiers = new List<Modifier>()
     {
-
+        new Modifier(Modif.addDamage, 0),
+        new Modifier(Modif.multDamage, 100),
+        new Modifier(Modif.startReady, 0),
+        new Modifier(Modif.secondWind, 0),
+        new Modifier(Modif.ahnksProtection, 0)
     };
 
     //Modifiers will be used to store any changes to stats or values based on equipment or other stats. For example, an additional 5 HP will be added for every level of Endurance.
@@ -178,14 +182,15 @@ public class EnemyScript : MonoBehaviour
     void Start()
     {
         Debug.Log("EnemyScript Running");
-        StartCoroutine("ActionCoroutine");
+
+        Coroutine actionCoroutine = StartCoroutine("ActionCoroutine");
         Coroutine statusCoroutine = StartCoroutine("StatusCoroutine");
         Coroutine manaCoroutine = StartCoroutine("ManaCoroutine");
     }
 
     public void OnAttacked(int damage, DamageType type, List<Value> inputStats)
     {
-        //print("Enemy has been attacked!");
+        //print("Player has been attacked!");
         //First, calculate the chance that the attack will hit in the first place.
         //Consider: Maybe factor in something on the enemies' side when calculating dodge chance?
         List<Value> enemyStats = new List<Value>();
@@ -257,8 +262,6 @@ public class EnemyScript : MonoBehaviour
         }
     }
 
-
-    //The below code for the attack function was copied directly from the player script. (As was most of the code here, since enemies will follow the same rules as players.)
     //*
     public void Attack()
     {
@@ -273,6 +276,8 @@ public class EnemyScript : MonoBehaviour
         int enduranceScore = stats.Find(val => val.Name == "endurance").Val;
         int intelligenceScore = stats.Find(val => val.Name == "intelligence").Val;
         int attunementScore = stats.Find(val => val.Name == "attunement").Val;
+        int addDamageModif = modifiers.Find(val => val.ModifierType == Modif.addDamage).ModifStrength;
+        int multDamageModif = modifiers.Find(val => val.ModifierType == Modif.multDamage).ModifStrength;
 
         //int weaponDamage = 10; //This is a temporary variable, setting it to ten for a punch. Will be determined by equiped weapon later.
         int minWeaponDamage = 8;
@@ -286,12 +291,12 @@ public class EnemyScript : MonoBehaviour
         switch (weaponType)
         {
             case WeaponType.physical:
-                attackDamage = Mathf.RoundToInt(weaponDamage * (0.25f * Mathf.Pow(strengthScore, 0.5f) + 1));
-                Debug.Log((0.25f * Mathf.Pow(strengthScore, 0.5f) + 1));
+                attackDamage = Mathf.RoundToInt((multDamageModif / 100f) * (addDamageModif + (weaponDamage * (0.25f * Mathf.Pow(strengthScore, 0.5f) + 1))));
+                //Debug.Log((multDamageModif / 100f) * (addDamageModif + (0.25f * Mathf.Pow(strengthScore, 0.5f) + 1)));
                 enemyScript.OnAttacked(attackDamage, weaponDamageType, stats);
                 break;
             case WeaponType.magical:
-                attackDamage = Mathf.RoundToInt(weaponDamage * (0.25f * (Mathf.Pow(intelligenceScore, 0.5f) + 1)));
+                attackDamage = Mathf.RoundToInt((multDamageModif / 100f) * (addDamageModif + (weaponDamage * (0.25f * Mathf.Pow(intelligenceScore, 0.5f) + 1))));
                 enemyScript.OnAttacked(attackDamage, weaponDamageType, stats);
                 break;
             default:
@@ -303,15 +308,14 @@ public class EnemyScript : MonoBehaviour
     //TODO: Handle player and enemy death.
     public void OnDeath()
     {
-        //For now, I'll just log a debug message when an enemy dies, maybe hide their sprite too.
-        Debug.Log("Enemy has died!");
+
     }
 
-    //This function is going to be the hardest part of making enemies. I have never wrtitten AI code before, so I'll be walking into this blind. One of the downsides of a single player game...
-    public void Decide()
+    //This will be the function responsible for halting all status, regen, and action timers when a character's turn starts.
+    //This way, there is no benefit or detriment to taking your time and thinking out your actions. Combo's are cool, after all.
+    public void StartTurn()
     {
-        //I'm writing this code late at night, and I frankly have no idea what I'm doing. For now, I'll just make the enemy attack the player back every turn since that's all there is to do.
-        Attack();
+
     }
 
     public void printStats()
