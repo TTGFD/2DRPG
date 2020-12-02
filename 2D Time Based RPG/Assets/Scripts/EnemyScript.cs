@@ -24,15 +24,10 @@ public class EnemyScript : MonoBehaviour
             //I need to calculate the rate of increase based on agility, but just a hard-coded 10 APS will work for now.
             //Scratch that, with a max Action of 100 that takes way too long. 40 APS makes for a good number in my opinion.
             //Changing it again down to 20 for the sake of incentivising at least some point allocation into agility.
-            int oldValue = values[actionIndex].Val;
             values[actionIndex].Val += 1;
             if (values[actionIndex].Val > values[maxActionIndex].Val)
             {
                 values[actionIndex].Val = values[maxActionIndex].Val;
-            }
-            if (oldValue != values[actionIndex].Val)
-            {
-                HUDManager.UpdateHud(values);
             }
             if (values[actionIndex].Val == values[maxActionIndex].Val)
             {
@@ -59,15 +54,10 @@ public class EnemyScript : MonoBehaviour
             //I need to calculate the rate of increase based on agility, but just a hard-coded 10 APS will work for now.
             //Scratch that, with a max Action of 100 that takes way too long. 40 APS makes for a good number in my opinion.
             //Changing it again down to 20 for the sake of incentivising at least some point allocation into agility.
-            int oldValue = values[manaIndex].Val;
             values[manaIndex].Val += 1;
             if (values[manaIndex].Val > values[maxActionIndex].Val)
             {
                 values[manaIndex].Val = values[maxActionIndex].Val;
-            }
-            if (oldValue != values[manaIndex].Val)
-            {
-                HUDManager.UpdateHud(values);
             }
             yield return new WaitForSeconds(seconds: 1f / (Convert.ToSingle(stats[attunementIndex].Val) + 4f));
         }
@@ -119,8 +109,6 @@ public class EnemyScript : MonoBehaviour
             yield return new WaitForSeconds(1);
         }
     }
-
-    public HUDManager HUDManager;
 
     public List<Vulnerability> vulnerabilites = new List<Vulnerability>()
     //Negitive numbers represent weakness to a damage type.
@@ -197,7 +185,7 @@ public class EnemyScript : MonoBehaviour
 
     public void OnAttacked(int damage, DamageType type, List<Value> inputStats)
     {
-        print("Enemy has been attacked!");
+        //print("Enemy has been attacked!");
         //First, calculate the chance that the attack will hit in the first place.
         //Consider: Maybe factor in something on the enemies' side when calculating dodge chance?
         List<Value> enemyStats = new List<Value>();
@@ -251,7 +239,7 @@ public class EnemyScript : MonoBehaviour
         }
         else
         {
-            if (Random.Range(0, 101) >= hitChance)
+            if (Random.Range(0, 101) <= hitChance)
             {
                 try
                 {
@@ -264,7 +252,7 @@ public class EnemyScript : MonoBehaviour
             }
             else
             {
-                Debug.Log("The Attack was dodged!");
+                //Debug.Log("The Attack was dodged!");
             }
         }
     }

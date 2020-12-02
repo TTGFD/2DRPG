@@ -378,6 +378,17 @@ MonoBehaviour:
     Val: 0
   - Name: attunement
     Val: 0
+  modifiers:
+  - ModifierType: 0
+    ModifStrength: 0
+  - ModifierType: 1
+    ModifStrength: 100
+  - ModifierType: 2
+    ModifStrength: 0
+  - ModifierType: 3
+    ModifStrength: 0
+  - ModifierType: 4
+    ModifStrength: 0
 --- !u!1 &214581648
 GameObject:
   m_ObjectHideFlags: 0
@@ -412,11 +423,11 @@ RectTransform:
   m_Father: {fileID: 475596061}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -349, y: -168}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 21, y: 21}
   m_SizeDelta: {x: 160, y: 30}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 0}
 --- !u!114 &214581650
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -542,11 +553,11 @@ RectTransform:
   m_Father: {fileID: 475596061}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -220, y: 115}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 25, y: -76.976}
   m_SizeDelta: {x: 417.9303, y: 27.48825}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!114 &254938866
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1371,11 +1382,11 @@ RectTransform:
   m_Father: {fileID: 475596061}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -220, y: 142.48999}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 25, y: -49.488}
   m_SizeDelta: {x: 417.9303, y: 27.48825}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!114 &1112765731
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1464,7 +1475,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 200061043}
   GameManager: {fileID: 1350969170}
-  HUDManager: {fileID: 475596062}
   vulnerabilites:
   - DamageType: 0
     VulnPercent: 100
@@ -1556,11 +1566,11 @@ RectTransform:
   m_Father: {fileID: 475596061}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -220, y: 169.98}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 25, y: -22}
   m_SizeDelta: {x: 417.9303, y: 27.48825}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!114 &1204360468
 MonoBehaviour:
   m_ObjectHideFlags: 0

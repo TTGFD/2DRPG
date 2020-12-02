@@ -179,9 +179,13 @@ public class PlayerBattleScript : MonoBehaviour
         {"poison", 0}
     };
 
-    public Dictionary<string, int> modifiers = new Dictionary<string, int>()
+    public List<Modifier> modifiers = new List<Modifier>()
     {
-
+        new Modifier(Modif.addDamage, 0),
+        new Modifier(Modif.multDamage, 100),
+        new Modifier(Modif.startReady, 0),
+        new Modifier(Modif.secondWind, 0),
+        new Modifier(Modif.ahnksProtection, 0)
     };
 
     //Modifiers will be used to store any changes to stats or values based on equipment or other stats. For example, an additional 5 HP will be added for every level of Endurance.
@@ -198,7 +202,7 @@ public class PlayerBattleScript : MonoBehaviour
 
     public void OnAttacked(int damage, DamageType type, List<Value> inputStats)
     {
-        print("Player has been attacked!");
+        //print("Player has been attacked!");
         //First, calculate the chance that the attack will hit in the first place.
         //Consider: Maybe factor in something on the enemies' side when calculating dodge chance?
         List<Value> enemyStats = new List<Value>();
@@ -252,7 +256,7 @@ public class PlayerBattleScript : MonoBehaviour
         }
         else
         {
-            if (Random.Range(0, 101) >= hitChance)
+            if (Random.Range(0, 101) <= hitChance)
             {
                 try
                 {
@@ -265,7 +269,7 @@ public class PlayerBattleScript : MonoBehaviour
             }
             else
             {
-                Debug.Log("The Attack was dodged!");
+                //Debug.Log("The Attack was dodged!");
             }
         }
 
@@ -286,6 +290,8 @@ public class PlayerBattleScript : MonoBehaviour
         int enduranceScore = stats.Find(val => val.Name == "endurance").Val;
         int intelligenceScore = stats.Find(val => val.Name == "intelligence").Val;
         int attunementScore = stats.Find(val => val.Name == "attunement").Val;
+        int addDamageModif = modifiers.Find(val => val.ModifierType == Modif.addDamage).ModifStrength;
+        int multDamageModif = modifiers.Find(val => val.ModifierType == Modif.multDamage).ModifStrength;
 
         //int weaponDamage = 10; //This is a temporary variable, setting it to ten for a punch. Will be determined by equiped weapon later.
         int minWeaponDamage = 8;
@@ -299,12 +305,12 @@ public class PlayerBattleScript : MonoBehaviour
         switch (weaponType)
         {
             case WeaponType.physical:
-                attackDamage = Mathf.RoundToInt(weaponDamage * (0.25f * Mathf.Pow(strengthScore, 0.5f) + 1));
-                Debug.Log((0.25f * Mathf.Pow(strengthScore, 0.5f) + 1));
+                attackDamage = Mathf.RoundToInt((multDamageModif / 100f) * (addDamageModif + (weaponDamage * (0.25f * Mathf.Pow(strengthScore, 0.5f) + 1))));
+                //Debug.Log((multDamageModif / 100f) * (addDamageModif + (0.25f * Mathf.Pow(strengthScore, 0.5f) + 1)));
                 enemyScript.OnAttacked(attackDamage, weaponDamageType, stats);
                 break;
             case WeaponType.magical:
-                attackDamage = Mathf.RoundToInt(weaponDamage * (0.25f * (Mathf.Pow(intelligenceScore, 0.5f) + 1)));
+                attackDamage = Mathf.RoundToInt((multDamageModif / 100f) * (addDamageModif + (weaponDamage * (0.25f * Mathf.Pow(intelligenceScore, 0.5f) + 1))));
                 enemyScript.OnAttacked(attackDamage, weaponDamageType, stats);
                 break;
             default:
